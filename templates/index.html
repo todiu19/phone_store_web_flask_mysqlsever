@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - PhoneStore{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Điện thoại chính hãng</h1>
+                <p class="lead">Khám phá bộ sưu tập điện thoại mới nhất với giá tốt nhất thị trường</p>
+                <a href="{{ url_for('search') }}" class="btn btn-light btn-lg">Mua ngay</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/hero-phone.png') }}" alt="Điện thoại" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form action="{{ url_for('search') }}" method="GET" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Tìm kiếm điện thoại..." value="{{ request.args.get('q', '') }}">
+                <select name="category" class="form-select me-2" style="max-width: 200px;">
+                    <option value="">Tất cả danh mục</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.args.get('category') == category.id|string %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="container my-5">
+    <h2 class="text-center mb-5">Sản phẩm nổi bật</h2>
+    
+    {% if phones %}
+    <div class="row">
+        {% for phone in phones %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 product-card">
+                <div class="position-relative">
+                    <img src="{{ url_for('static', filename=phone.image) }}" class="card-img-top" alt="{{ phone.name }}" style="height: 250px; object-fit: cover;">
+                    {% if phone.stock > 0 %}
+                    <span class="badge bg-success position-absolute top-0 end-0 m-2">Còn hàng</span>
+                    {% else %}
+                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Hết hàng</span>
+                    {% endif %}
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ phone.name }}</h5>
+                    <p class="card-text text-muted small">{{ phone.brand }} {{ phone.model }}</p>
+                    <div class="mb-2">
+                        <span class="badge bg-primary">{{ phone.color }}</span>
+                        <span class="badge bg-secondary">{{ phone.storage }}</span>
+                    </div>
+                    <p class="card-text flex-grow-1">{{ phone.description[:100] }}...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="text-danger mb-0">{{ "{:,.0f}".format(phone.price) }}₫</h4>
+                        {% if phone.stock > 0 %}
+                        <button class="btn btn-primary" onclick="addToCart({{ phone.id }})">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                        {% else %}
+                        <button class="btn btn-secondary" disabled>Hết hàng</button>
+                        {% endif %}
+                    </div>
+                    <div class="mt-2">
+                        <a href="{{ url_for('product_detail', product_id=phone.id) }}" class="btn btn-outline-primary btn-sm w-100">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-mobile-alt fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Chưa có sản phẩm nào</h4>
+        <p class="text-muted">Hãy thêm sản phẩm mới vào hệ thống</p>
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary">Thêm sản phẩm</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Categories Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Danh mục sản phẩm</h2>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+                <a href="{{ url_for('search', category=category.id) }}" class="text-decoration-none">
+                    <div class="card text-center h-100 category-card">
+                        <div class="card-body">
+                            <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                            <h6 class="card-title">{{ category.name }}</h6>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.category-card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}

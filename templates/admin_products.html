@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý sản phẩm - PhoneStore{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-cogs me-2"></i>Quản lý sản phẩm
+        </h1>
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+        </a>
+    </div>
+    
+    {% if products %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Danh mục</th>
+                            <th>Giá</th>
+                            <th>Tồn kho</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename=product.image) }}" 
+                                     alt="{{ product.name }}" 
+                                     class="img-thumbnail" 
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                            </td>
+                            <td>
+                                <strong>{{ product.name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ product.model }}</small>
+                            </td>
+                            <td>{{ product.brand }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ product.category_name or 'Chưa phân loại' }}</span>
+                            </td>
+                            <td>
+                                <strong class="text-danger">{{ "{:,.0f}".format(product.price) }}₫</strong>
+                            </td>
+                            <td>
+                                <span class="badge {% if product.stock > 10 %}bg-success{% elif product.stock > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ product.stock }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if product.status == 'active' %}
+                                <span class="badge bg-success">Hoạt động</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Ngừng bán</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                                       class="btn btn-outline-info btn-sm" title="Xem chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('edit_product', product_id=product.id) }}" 
+                                       class="btn btn-outline-primary btn-sm" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ url_for('delete_product', product_id=product.id) }}" 
+                                       class="btn btn-outline-danger btn-sm" 
+                                       title="Xóa"
+                                       onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ products|length }}</h5>
+                    <p class="card-text">Tổng sản phẩm</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success">{{ products|selectattr('status', 'equalto', 'active')|list|length }}</h5>
+                    <p class="card-text">Đang bán</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">{{ products|selectattr('stock', 'lt', 10)|list|length }}</h5>
+                    <p class="card-text">Sắp hết hàng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">{{ products|selectattr('stock', 'equalto', 0)|list|length }}</h5>
+                    <p class="card-text">Hết hàng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+        <h3 class="text-muted">Chưa có sản phẩm nào</h3>
+        <p class="text-muted">Hãy thêm sản phẩm đầu tiên vào hệ thống</p>
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Thêm sản phẩm mới
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.table th {
+    border-top: none;
+}
+
+.img-thumbnail {
+    border: 1px solid #dee2e6;
+}
+
+.btn-group .btn {
+    margin-right: 2px;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+</style>
+{% endblock %}
+

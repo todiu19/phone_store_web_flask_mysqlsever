@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sửa sinh viên</title>
+</head>
+<body>
+    <h1>Cập nhật thông tin sinh viên</h1>
+    <form method="POST">
+        Tên: <input type="text" name="name" value="{{student.name}}"  required><br><br>
+        Tuổi: <input type="number" name="age" value = "{{student.age}}" required><br><br>
+        <button type="submit">💾 Lưu thay đổi</button>
+    </form>
+    <br>
+    <a href="{{ url_for('index') }}">⬅ Quay lại</a>
+</body>
+</html>
