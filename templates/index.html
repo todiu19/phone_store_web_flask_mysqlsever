@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Trang chủ - PhoneStore{% endblock %}
-
 {% block content %}
 <!-- Hero Section -->
 <div class="hero-section bg-primary text-white py-5">
@@ -12,8 +10,8 @@
                 <p class="lead">Khám phá bộ sưu tập điện thoại mới nhất với giá tốt nhất thị trường</p>
                 <a href="{{ url_for('search') }}" class="btn btn-light btn-lg">Mua ngay</a>
             </div>
-            <div class="col-lg-6">
-                <img src="{{ url_for('static', filename='images/hero-phone.png') }}" alt="Điện thoại" class="img-fluid">
+            <div class="col-lg-6 d-flex justify-content-center align-items-center">
+                <img src="{{ url_for('static', filename='images/prd1.png') }}" alt="Điện thoại" class="img-fluid">
             </div>
         </div>
     </div>
@@ -117,33 +115,32 @@
     </div>
 </div>
 {% endblock %}
-
 {% block scripts %}
 <style>
 .hero-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
-
 .product-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: none;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-
 .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 20px rgba(0,0,0,0.15);
 }
-
 .category-card {
     transition: transform 0.3s ease;
     border: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-
 .category-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+.img-fluid {
+    width: 250px;
+    height: auto;
 }
 </style>
 {% endblock %}
