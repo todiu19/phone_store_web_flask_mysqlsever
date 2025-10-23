@@ -49,9 +49,28 @@
                             </span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_products') }}">Quản lý</a>
-                    </li>
+                    {% if session.user_id %}
+                        {% if session.user_role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_products') }}">Quản lý</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ session.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Đăng nhập</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Đăng ký</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -158,6 +177,7 @@
     {% block scripts %}{% endblock %}
 </body>
 </html>
+
 
 
 

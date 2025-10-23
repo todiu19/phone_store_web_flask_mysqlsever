@@ -1,6 +1,5 @@
 -- Tạo cơ sở dữ liệu cho trang web bán điện thoại
 -- Sử dụng MySQL
-
 -- Tạo database (nếu chưa có)
 CREATE DATABASE IF NOT EXISTS phone_store;
 USE phone_store;
@@ -55,6 +54,17 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
+-- Bảng người dùng
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Thêm dữ liệu mẫu cho danh mục
 INSERT INTO categories (name, description) VALUES
 ('iPhone', 'Điện thoại iPhone của Apple'),
@@ -65,6 +75,11 @@ INSERT INTO categories (name, description) VALUES
 ('OnePlus', 'Điện thoại OnePlus'),
 ('Huawei', 'Điện thoại Huawei'),
 ('Realme', 'Điện thoại Realme');
+
+-- Thêm dữ liệu mẫu cho người dùng (password sẽ được cập nhật bằng script)
+INSERT INTO users (username, email, password, role) VALUES
+('admin', 'admin@phonestore.com', 'temp_password', 'admin'),
+('user1', 'user1@example.com', 'temp_password', 'user');
 
 -- Thêm dữ liệu mẫu cho sản phẩm
 INSERT INTO products (name, description, price, stock, category_id, brand, model, color, storage, image, status) VALUES

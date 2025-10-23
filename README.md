@@ -1,6 +1,6 @@
 # PhoneStore - Trang web bán điện thoại
 
-Trang web bán điện thoại được xây dựng bằng Flask và MySQL với giao diện hiện đại và responsive.
+Trang web bán điện thoại được xây dựng bằng Flask và MySQL
 
 ## Tính năng
 
@@ -17,58 +17,6 @@ Trang web bán điện thoại được xây dựng bằng Flask và MySQL với
 - ✅ Upload hình ảnh sản phẩm
 - ✅ Thống kê sản phẩm
 
-## Cài đặt
-
-### 1. Cài đặt Python và MySQL
-- Python 3.8+
-- MySQL 5.7+ hoặc 8.0+
-
-### 2. Clone repository
-```bash
-git clone <repository-url>
-cd MyFlaskApp_advance
-```
-
-### 3. Tạo virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate  # Trên Windows: venv\Scripts\activate
-```
-
-### 4. Cài đặt dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Thiết lập cơ sở dữ liệu
-1. Tạo database MySQL:
-```sql
-CREATE DATABASE phone_store;
-```
-
-2. Chạy file SQL để tạo bảng và dữ liệu mẫu:
-```bash
-mysql -u root -p phone_store < database_setup.sql
-```
-
-3. Cập nhật thông tin kết nối trong `DB_connect.py`:
-```python
-def get_db_connection():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="your_username",
-        password="your_password",
-        database="phone_store"
-    )
-    return conn
-```
-
-### 6. Chạy ứng dụng
-```bash
-python app.py
-```
-
-Truy cập: http://localhost:5000
 
 ## Cấu trúc dự án
 
@@ -190,10 +138,9 @@ Chỉnh sửa file `static/style.css` hoặc các template trong thư mục `tem
 - Xóa cache trình duyệt
 - Kiểm tra console để xem lỗi JavaScript
 
-## Phát triển tiếp
+
 
 ### Tính năng có thể thêm:
-- [ ] Đăng nhập/đăng ký người dùng
 - [ ] Hệ thống đánh giá sản phẩm
 - [ ] Thanh toán online
 - [ ] Quản lý đơn hàng
@@ -203,12 +150,5 @@ Chỉnh sửa file `static/style.css` hoặc các template trong thư mục `tem
 - [ ] Wishlist
 - [ ] Newsletter
 
-## License
-
-MIT License
-
-## Tác giả
-
-Phát triển bởi: [Tên tác giả]
-Email: [email@example.com]
+Email: [tonguyen191224@gmail.com]
 

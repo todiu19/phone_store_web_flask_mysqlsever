@@ -3,8 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from DB_connect import get_db_connection
 import os
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Cần thiết cho session
@@ -18,29 +16,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 def init_cart():
     if 'cart' not in session:
         session['cart'] = {}
-
-# Decorator để kiểm tra đăng nhập
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Vui lòng đăng nhập để truy cập trang này!', 'error')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-# Decorator để kiểm tra quyền admin
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Vui lòng đăng nhập để truy cập trang này!', 'error')
-            return redirect(url_for('login'))
-        if session.get('user_role') != 'admin':
-            flash('Bạn không có quyền truy cập trang này!', 'error')
-            return redirect(url_for('index'))
-        return f(*args, **kwargs)
-    return decorated_function
 
 # ===============================
 # TRANG CHỦ - DANH SÁCH ĐIỆN THOẠI
@@ -67,87 +42,6 @@ def index():
     
     conn.close()
     return render_template('index.html', phones=phones, categories=categories)
-
-# ===============================
-# ĐĂNG NHẬP
-# ===============================
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        user = cursor.fetchone()
-        conn.close()
-        
-        if user and check_password_hash(user['password'], password):
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['user_role'] = user['role']
-            flash('Đăng nhập thành công!', 'success')
-            return redirect(url_for('index'))
-        else:
-            flash('Tên đăng nhập hoặc mật khẩu không đúng!', 'error')
-    
-    return render_template('login.html')
-
-# ===============================
-# ĐĂNG KÝ
-# ===============================
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-        
-        if password != confirm_password:
-            flash('Mật khẩu xác nhận không khớp!', 'error')
-            return render_template('register.html')
-        
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Kiểm tra username đã tồn tại
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        if cursor.fetchone():
-            flash('Tên đăng nhập đã tồn tại!', 'error')
-            conn.close()
-            return render_template('register.html')
-        
-        # Kiểm tra email đã tồn tại
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        if cursor.fetchone():
-            flash('Email đã tồn tại!', 'error')
-            conn.close()
-            return render_template('register.html')
-        
-        # Tạo user mới
-        hashed_password = generate_password_hash(password)
-        cursor.execute("""
-            INSERT INTO users (username, email, password, role) 
-            VALUES (%s, %s, %s, 'user')
-        """, (username, email, hashed_password))
-        conn.commit()
-        conn.close()
-        
-        flash('Đăng ký thành công! Vui lòng đăng nhập.', 'success')
-        return redirect(url_for('login'))
-    
-    return render_template('register.html')
-
-# ===============================
-# ĐĂNG XUẤT
-# ===============================
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash('Đã đăng xuất thành công!', 'success')
-    return redirect(url_for('index'))
 
 # ===============================
 # TRANG CHI TIẾT SẢN PHẨM
@@ -215,6 +109,7 @@ def cart():
     init_cart()
     cart_items = []
     total = 0
+    
     if session['cart']:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -263,7 +158,6 @@ def remove_from_cart(product_id):
 # TRANG QUẢN LÝ SẢN PHẨM
 # ===============================
 @app.route('/admin/products')
-@admin_required
 def admin_products():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -281,7 +175,6 @@ def admin_products():
 # THÊM SẢN PHẨM MỚI
 # ===============================
 @app.route('/admin/add_product', methods=['GET', 'POST'])
-@admin_required
 def add_product():
     if request.method == 'POST':
         name = request.form['name']
@@ -329,7 +222,6 @@ def add_product():
 # SỬA SẢN PHẨM
 # ===============================
 @app.route('/admin/edit_product/<int:product_id>', methods=['GET', 'POST'])
-@admin_required
 def edit_product(product_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -385,7 +277,6 @@ def edit_product(product_id):
 # XÓA SẢN PHẨM
 # ===============================
 @app.route('/admin/delete_product/<int:product_id>')
-@admin_required
 def delete_product(product_id):
     conn = get_db_connection()
     cursor = conn.cursor()
