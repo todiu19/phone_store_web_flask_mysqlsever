@@ -59,8 +59,11 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="price" class="form-label">Giá bán (VNĐ) <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="price" name="price" 
-                                           value="{{ product.price }}" min="0" step="1000" required>
+                                        <!-- <input type="number" class="form-control" id="price" name="price" 
+                                        value="{{ product.price }}" min="0" max="99999999999" step="any" required>                                              -->
+                                        <input type="text" class="form-control" id="price" name="price"
+                                        value="{{ product.price }}" placeholder="Nhập giá bán (VNĐ)" required>
+
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -140,13 +143,29 @@
 
 {% block scripts %}
 <script>
-// Format số tiền khi nhập
-document.getElementById('price').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
+    
+const priceInput = document.getElementById('price');
+
+// Format khi nhập
+priceInput.addEventListener('input', function(e) {
+    let value = this.value.replace(/\D/g, ''); // loại bỏ ký tự không phải số
     if (value) {
-        e.target.value = parseInt(value).toLocaleString('vi-VN');
+        this.value = Number(value).toLocaleString('vi-VN'); // format VNĐ
+    } else {
+        this.value = '';
     }
 });
+document.querySelector('form').addEventListener('submit', function(e) {
+    priceInput.value = priceInput.value.replace(/\./g, ''); // bỏ dấu chấm
+});
+
+// Format số tiền khi nhập
+// document.getElementById('price').addEventListener('input', function(e) {
+//     let value = e.target.value.replace(/\D/g, '');
+//     if (value) {
+//         e.target.value = parseInt(value).toLocaleString('vi-VN');
+//     }
+// });
 
 // Preview hình ảnh mới
 document.getElementById('image').addEventListener('change', function(e) {

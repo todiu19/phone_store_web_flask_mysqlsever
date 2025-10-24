@@ -9,17 +9,15 @@ from functools import wraps
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Cần thiết cho session
 
-# Thư mục chứa ảnh upload
 UPLOAD_FOLDER = os.path.join('static', 'images')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
-# Khởi tạo giỏ hàng trong session
 def init_cart():
     if 'cart' not in session:
         session['cart'] = {}
 
-# Decorator để kiểm tra đăng nhập
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -29,7 +27,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Decorator để kiểm tra quyền admin
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -51,7 +49,6 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Lấy danh sách điện thoại với thông tin chi tiết
     cursor.execute("""
         SELECT p.*, c.name as category_name 
         FROM products p 
@@ -61,7 +58,6 @@ def index():
     """)
     phones = cursor.fetchall()
     
-    # Lấy danh sách danh mục
     cursor.execute("SELECT * FROM categories ORDER BY name")
     categories = cursor.fetchall()
     
