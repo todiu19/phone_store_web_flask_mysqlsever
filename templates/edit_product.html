@@ -146,26 +146,21 @@
     
 const priceInput = document.getElementById('price');
 
-// Format khi nhập
-priceInput.addEventListener('input', function(e) {
-    let value = this.value.replace(/\D/g, ''); // loại bỏ ký tự không phải số
-    if (value) {
-        this.value = Number(value).toLocaleString('vi-VN'); // format VNĐ
-    } else {
-        this.value = '';
-    }
-});
-document.querySelector('form').addEventListener('submit', function(e) {
-    priceInput.value = priceInput.value.replace(/\./g, ''); // bỏ dấu chấm
-});
-
-// Format số tiền khi nhập
-// document.getElementById('price').addEventListener('input', function(e) {
-//     let value = e.target.value.replace(/\D/g, '');
+// Format khi nhập 
+// priceInput.addEventListener('input', function(e) {
+//     let value = this.value.replace(/\D/g,''); // loại bỏ ký tự không phải số
 //     if (value) {
-//         e.target.value = parseInt(value).toLocaleString('vi-VN');
+//         this.value = Number(value).toLocaleString('vi-VN'); // format VNĐ
+//     } else {
+//         this.value = '';
 //     }
 // });
+
+//convert từ format nhập sang decimal để return to database
+// document.querySelector('form').addEventListener('submit', function(e) {
+//     priceInput.value = priceInput.value.replace(/\./g, ''); // bỏ dấu chấm
+// });
+
 
 // Preview hình ảnh mới
 document.getElementById('image').addEventListener('change', function(e) {

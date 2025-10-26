@@ -13,8 +13,8 @@ def create_admin_user():
     admin_hash = generate_password_hash(admin_password)
     user_hash = generate_password_hash(user_password)
     
-    # print(f"Admin password hash: {admin_hash}")
-    # print(f"User password hash: {user_hash}")
+    print(f"Admin password hash: {admin_hash}")
+    print(f"User password hash: {user_hash}")
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -24,9 +24,9 @@ def create_admin_user():
         cursor.execute("UPDATE users SET password = %s WHERE username = 'user1'", (user_hash,))
         
         conn.commit()
-        # print("Đã cập nhật password thành công!")
-        # print("Admin login: admin / admin123")
-        # print("User login: user1 / user123")
+        print("Đã cập nhật password thành công!")
+        print("Admin login: admin / admin123")
+        print("User login: user1 / user123")
         
     except Exception as e:
         print(f"Lỗi: {e}")

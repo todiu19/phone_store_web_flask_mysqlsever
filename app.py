@@ -1,4 +1,5 @@
 # Trang web bán điện thoại sử dụng Flask và MySQL
+from operator import truediv
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from DB_connect import get_db_connection
 import os
@@ -7,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Cần thiết cho session
+app.secret_key = 'Tonguyen24@'  # Cần thiết cho session
 
 UPLOAD_FOLDER = os.path.join('static', 'images')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -16,7 +17,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 def init_cart():
     if 'cart' not in session:
         session['cart'] = {}
-
 
 def login_required(f):
     @wraps(f)
@@ -63,6 +63,24 @@ def index():
     
     conn.close()
     return render_template('index.html', phones=phones, categories=categories)
+# =================================
+# Số lượng sản phẩm trong giỏ hàng
+# =================================
+@app.context_processor
+def injext_cart_count():
+    count = 0
+    if 'user_id' in session:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""SELECT SUM(quantity)
+                        FROM cart_items 
+                        WHERE user_id = %s
+                        """,(session['user_id'],))
+        count = cursor.fetchone()['SUM(quantity)'] or 0
+        conn.close()
+    elif 'cart' in session:
+        count = sum(session['cart'].values())
+    return dict(cart_count = count)
 
 # ===============================
 # ĐĂNG NHẬP
@@ -87,12 +105,13 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('Tên đăng nhập hoặc mật khẩu không đúng!', 'error')
-    
+
     return render_template('login.html')
 
 # ===============================
 # ĐĂNG KÝ
 # ===============================
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -180,79 +199,127 @@ def product_detail(product_id):
 # ===============================
 # THÊM VÀO GIỎ HÀNG
 # ===============================
+#ddaas them hang vao db
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    init_cart()
     product_id = request.form.get('product_id')
     quantity = int(request.form.get('quantity', 1))
-    
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM products WHERE id = %s AND status = 'active'", (product_id,))
-    product = cursor.fetchone()
+
+    if 'user_id' in session:
+        cursor.execute("""INSERT INTO cart_items(user_id,product_id,quantity)
+        VALUES(%s,%s,%s) 
+        ON DUPLICATE KEY UPDATE 
+            quantity = quantity + VALUES(quantity)
+        """,(session['user_id'],product_id,quantity))
+        conn.commit()
+        #cap nhat lại so luong sp trong gio hang
+        cursor.execute("SELECT SUM(quantity) AS total FROM cart_items WHERE user_id = %s", (session['user_id'],))
+        count = cursor.fetchone()['total'] or 0 
+
+    else:
+        init_cart()
+        cursor.execute("SELECT * FROM products WHERE id = %s AND status = 'active'", (product_id,))
+        product = cursor.fetchone()
+        if not product:
+            return jsonify({'success': False, 'message': 'Sản phẩm không tồn tại!'})
+        if product_id in session['cart']:
+            session['cart'][product_id] += quantity
+        else:
+            session['cart'][product_id] = quantity
+        session.modified = True
+        #cap nhat lại so luong sp trong gio hang
+        count = sum(session['cart'].values())
+   
     conn.close()
     
-    if not product:
-        return jsonify({'success': False, 'message': 'Sản phẩm không tồn tại!'})
-    
-    if product_id in session['cart']:
-        session['cart'][product_id] += quantity
-    else:
-        session['cart'][product_id] = quantity
-    
-    session.modified = True
-    return jsonify({'success': True, 'message': 'Đã thêm vào giỏ hàng!'})
+    return jsonify({'success': True, 'message': 'Đã thêm vào giỏ hàng!','cart_count':count})
 
 # ===============================
 # XEM GIỎ HÀNG
 # ===============================
+#xem gio hang tu db
 @app.route('/cart')
 def cart():
-    init_cart()
-    cart_items = []
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cart_items=[]
     total = 0
-    if session['cart']:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        for product_id, quantity in session['cart'].items():
-            cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
-            product = cursor.fetchone()
-            if product:
-                product['quantity'] = quantity
-                product['subtotal'] = product['price'] * quantity
-                cart_items.append(product)
-                total += product['subtotal']
-        
-        conn.close()
-    
+    if 'user_id' in session:
+        user_id = session['user_id']
+        cursor.execute("""SELECT  *
+                       FROM cart_items c 
+                       JOIN products p ON  c.product_id = p.id
+                       WHERE c.user_id = %s    
+                        """,(user_id,))
+        cart_items = cursor.fetchall()
+        for item in cart_items:
+            item['subtotal'] = item['price']*item['quantity']
+            total+= item['subtotal'] 
+    else:
+        init_cart()
+        if 'cart' in session:
+            for id,quantity in session['cart'].items():
+                cursor.execute("SELECT * FROM products WHERE id = %s",(id,))
+                product = cursor.fetchone()
+                if product:
+                    product['quantity'] = quantity
+                    product['subtotal'] = product['price']*quantity
+                    cart_items.append(product)
+                    total += product['subtotal']
+    conn.close()
     return render_template('cart.html', cart_items=cart_items, total=total)
 
 # ===============================
 # CẬP NHẬT GIỎ HÀNG
 # ===============================
+#update quantity cho db and session
 @app.route('/update_cart', methods=['POST'])
 def update_cart():
-    init_cart()
     product_id = request.form.get('product_id')
     quantity = int(request.form.get('quantity', 0))
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
     
-    if quantity <= 0:
-        session['cart'].pop(product_id, None)
+    if 'user_id' in session:
+        if quantity <= 0:
+            cursor.execute("""DELETE FROM cart_items 
+                            WHERE user_id = %s AND product_id = %s
+                            """,(session['user_id'],product_id,))
+        else :
+            cursor.execute("""UPDATE cart_items 
+                            SET quantity = %s 
+                            WHERE user_id = %s AND product_id = %s
+                            """,(quantity,session['user_id'],product_id,))
+        conn.commit()
+        conn.close()
     else:
-        session['cart'][product_id] = quantity
-    
-    session.modified = True
+        init_cart()
+        if quantity <= 0:
+            session['cart'].pop(product_id, None)
+        else:
+            session['cart'][product_id] = quantity
+        session.modified = True
     return redirect(url_for('cart'))
 
 # ===============================
 # XÓA SẢN PHẨM KHỎI GIỎ HÀNG
 # ===============================
+#xoa khoi db
 @app.route('/remove_from_cart/<int:product_id>')
 def remove_from_cart(product_id):
-    init_cart()
-    session['cart'].pop(str(product_id), None)
-    session.modified = True
+    if 'user_id' in session:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""DELETE FROM cart_items WHERE product_id = %s AND user_id = %s
+                        """,(product_id,session['user_id'],))
+        conn.commit()
+        conn.close()
+    else:
+        init_cart()
+        session['cart'].pop(str(product_id), None)
+        session.modified = True
     return redirect(url_for('cart'))
 
 # ===============================
@@ -301,7 +368,7 @@ def add_product():
             image_url = 'images/default_phone.png'
         
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionnary = True)
         cursor.execute("""
             INSERT INTO products (name, description, price, stock, category_id, brand, model, color, storage, image, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
@@ -377,6 +444,62 @@ def edit_product(product_id):
     conn.close()
     return render_template('edit_product.html', product=product, categories=categories)
 
+# def edit_product(product_id):
+#     conn = get_db_connection()
+#     cursor = conn.cursor(dictionary=True)
+
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form['description']
+#         price = float(request.form['price'])
+#         stock = int(request.form['stock'])
+#         category_id = int(request.form['category_id'])
+#         brand = request.form['brand']
+#         model = request.form['model']
+#         color = request.form['color']
+#         storage = request.form['storage']
+#         status = request.form['status']
+
+#         image = request.files['image']
+#         if image and image.filename:
+#             filename = secure_filename(image.filename)
+#             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#             image.save(image_path)
+#             image_url = f'images/{filename}'
+#         else:
+#             cursor.execute("SELECT image FROM products WHERE id = %s", (product_id,))
+#             old_product = cursor.fetchone()
+#             image_url = old_product['image']
+
+#         try:
+#             cursor.execute("""
+#                 UPDATE products 
+#                 SET name=%s, description=%s, price=%s, stock=%s, category_id=%s,
+#                     brand=%s, model=%s, color=%s, storage=%s, image=%s, status=%s
+#                 WHERE id=%s
+#             """, (name, description, price, stock, category_id,
+#                   brand, model, color, storage, image_url, status, product_id))
+#             conn.commit()
+#             flash('Cập nhật sản phẩm thành công!', 'success')
+#         except Exception as e:
+#             conn.rollback()
+#             flash(f'Lỗi khi cập nhật sản phẩm: {e}', 'danger')
+#         finally:
+#             cursor.close()
+#             conn.close()
+
+#         return redirect(url_for('admin_products'))
+
+    # GET request: hiển thị form
+    # cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+    # product = cursor.fetchone()
+
+    # cursor.execute("SELECT * FROM categories ORDER BY name")
+    # categories = cursor.fetchall()
+
+    # conn.close()
+    # return render_template('edit_product.html', product=product, categories=categories)
+
 # ===============================
 # XÓA SẢN PHẨM
 # ===============================
@@ -384,7 +507,7 @@ def edit_product(product_id):
 @admin_required
 def delete_product(product_id):
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     cursor.execute("UPDATE products SET status = 'inactive' WHERE id = %s", (product_id,))
     conn.commit()
     conn.close()
