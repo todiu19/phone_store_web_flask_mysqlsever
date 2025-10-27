@@ -67,7 +67,7 @@ def index():
 # Số lượng sản phẩm trong giỏ hàng
 # =================================
 @app.context_processor
-def injext_cart_count():
+def inject_cart_count():
     count = 0
     if 'user_id' in session:
         conn = get_db_connection()
@@ -323,7 +323,8 @@ def remove_from_cart(product_id):
 
 # ===============================
 # Xác nhận đặt hàng
-# ===============================              
+# ===============================     
+#          
 @app.route('/checkout')
 def checkout():
     if 'user_id' not in session:
@@ -334,8 +335,8 @@ def checkout():
 #===============================
 # THÊM VÀO GIỎ HOÁ ĐƠN 
 # ===============================
-@app.route('/orders',methods=['POST'])
-def orders():
+@app.route('/add_to_orders',methods=['POST'])
+def add_to_orders():
     user_id = session['user_id']
     name = request.form['fullname']
     address = request.form['address']
@@ -474,7 +475,7 @@ def add_product():
             image_url = 'images/default_phone.png'
         
         conn = get_db_connection()
-        cursor = conn.cursor(dictionnary = True)
+        cursor = conn.cursor(dictionary = True)
         cursor.execute("""
             INSERT INTO products (name, description, price, stock, category_id, brand, model, color, storage, image, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')

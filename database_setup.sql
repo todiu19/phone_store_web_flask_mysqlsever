@@ -10,6 +10,17 @@ CREATE TABLE IF NOT EXISTS categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Bảng người dùng
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- Bảng sản phẩm (điện thoại)
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -28,7 +39,16 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
-
+-- Gio hang
+CREATE TABLE IF NOT EXISTS cart_items(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    product_id INT,
+    quantity INT DEFAULT 1,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    UNIQUE (user_id, product_id)
+);
 -- Bảng đơn hàng
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,8 +57,10 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_phone VARCHAR(20),
     customer_address TEXT,
     total_amount DECIMAL(10,2) NOT NULL,
+    user_id INT NOT NULL,
     status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Bảng chi tiết đơn hàng
@@ -52,16 +74,10 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Bảng người dùng
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('user', 'admin') DEFAULT 'user',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+
+
+
+
 
 -- Thêm dữ liệu mẫu cho danh mục
 INSERT INTO categories (name, description) VALUES
@@ -89,7 +105,7 @@ INSERT INTO products (name, description, price, stock, category_id, brand, model
 ('OnePlus 12', 'OnePlus 12 với Snapdragon 8 Gen 3, camera Hasselblad 50MP và màn hình LTPO AMOLED 6.82 inch', 17990000, 20, 6, 'OnePlus', '12', 'Silky Black', '256GB', 'images/oneplus12.jpg', 'active'),
 ('Huawei P60 Pro', 'Huawei P60 Pro với camera XMAGE 48MP, Kirin 9000S và màn hình OLED 6.67 inch', 16990000, 15, 7, 'Huawei', 'P60 Pro', 'Rococo Pearl', '512GB', 'images/huawei_p60.jpg', 'active'),
 ('Realme GT5 Pro', 'Realme GT5 Pro với Snapdragon 8 Gen 3, camera Sony IMX890 50MP và màn hình AMOLED 6.78 inch', 12990000, 45, 8, 'Realme', 'GT5 Pro', 'White', '256GB', 'images/realme_gt5.jpg', 'active');
--- Them san pham
+-- Them du lieu
 INSERT INTO products 
 (name, description, price, stock, category_id, brand, model, color, storage, image, status)
 VALUES

@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Thông tin giao hàng</h2>
-    <form action="{{ url_for('orders') }}" method="POST" class="w-50 mx-auto border rounded p-4 shadow">
+    <form action="{{ url_for('add_to_orders') }}" method="POST" class="w-50 mx-auto border rounded p-4 shadow">
         <div class="mb-3">
             <label for="fullname" class="form-label">Họ và tên</label>
             <input type="text" id="fullname" name="fullname" class="form-control" required>
