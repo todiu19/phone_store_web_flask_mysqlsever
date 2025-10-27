@@ -1,7 +1,5 @@
 # PhoneStore - Trang web bán điện thoại
 
-Trang web bán điện thoại được xây dựng bằng Flask và MySQL
-
 ## Tính năng
 
 ### Cho khách hàng:
@@ -9,7 +7,7 @@ Trang web bán điện thoại được xây dựng bằng Flask và MySQL
 - ✅ Tìm kiếm và lọc sản phẩm theo danh mục
 - ✅ Xem chi tiết sản phẩm
 - ✅ Giỏ hàng (thêm, sửa, xóa sản phẩm)
-- ✅ Giao diện responsive, thân thiện với mobile
+- ✅ Đặt Hàng 
 
 ### Cho quản trị viên:
 - ✅ Quản lý sản phẩm (thêm, sửa, xóa)

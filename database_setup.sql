@@ -89,6 +89,30 @@ INSERT INTO products (name, description, price, stock, category_id, brand, model
 ('OnePlus 12', 'OnePlus 12 với Snapdragon 8 Gen 3, camera Hasselblad 50MP và màn hình LTPO AMOLED 6.82 inch', 17990000, 20, 6, 'OnePlus', '12', 'Silky Black', '256GB', 'images/oneplus12.jpg', 'active'),
 ('Huawei P60 Pro', 'Huawei P60 Pro với camera XMAGE 48MP, Kirin 9000S và màn hình OLED 6.67 inch', 16990000, 15, 7, 'Huawei', 'P60 Pro', 'Rococo Pearl', '512GB', 'images/huawei_p60.jpg', 'active'),
 ('Realme GT5 Pro', 'Realme GT5 Pro với Snapdragon 8 Gen 3, camera Sony IMX890 50MP và màn hình AMOLED 6.78 inch', 12990000, 45, 8, 'Realme', 'GT5 Pro', 'White', '256GB', 'images/realme_gt5.jpg', 'active');
+-- Them san pham
+INSERT INTO products 
+(name, description, price, stock, category_id, brand, model, color, storage, image, status)
+VALUES
+-- APPLE
+('iPhone 16 Pro Max', 'iPhone 16 Pro Max với chip A18 Pro, camera 48MP và màn hình Super Retina XDR 6.9 inch.', 34990000, 40, 1, 'Apple', 'iPhone 16 Pro Max', 'Titanium Silver', '512GB', 'images/iphone16promax.jpg', 'active'),
+
+('Samsung Galaxy S25 Ultra', 'Galaxy S25 Ultra với camera 200MP, S Pen và màn hình Dynamic AMOLED 2X 6.8 inch.', 31990000, 35, 2, 'Samsung', 'Galaxy S25 Ultra', 'Titanium Gray', '512GB', 'images/galaxy_s25ultra.jpg', 'active'),
+
+('Xiaomi 15 Pro', 'Xiaomi 15 Pro trang bị Snapdragon 8 Gen 4, camera Leica 50MP và sạc nhanh 120W.', 19990000, 45, 3, 'Xiaomi', '15 Pro', 'Graphite Black', '512GB', 'images/xiaomi15pro.jpg', 'active'),
+
+('OPPO Find X8', 'OPPO Find X8 với camera Hasselblad 50MP, màn hình AMOLED 6.8 inch và sạc 100W.', 22990000, 25, 4, 'OPPO', 'Find X8', 'Ocean Blue', '256GB', 'images/oppo_findx8.jpg', 'active'),
+
+('Vivo X200 Pro', 'Vivo X200 Pro dùng Dimensity 9400, camera ZEISS 50MP và pin 5000mAh sạc 120W.', 21990000, 30, 5, 'Vivo', 'X200 Pro', 'Sunset Gold', '512GB', 'images/vivo_x200pro.jpg', 'active'),
+
+('OnePlus 13', 'OnePlus 13 trang bị Snapdragon 8 Gen 4, camera Hasselblad và màn hình LTPO AMOLED 6.82 inch.', 20990000, 28, 6, 'OnePlus', '13', 'Emerald Green', '512GB', 'images/oneplus13.jpg', 'active'),
+
+('Huawei Mate 70 Pro', 'Huawei Mate 70 Pro với chip Kirin 9010, camera XMAGE và màn hình OLED cong 6.7 inch.', 25990000, 22, 7, 'Huawei', 'Mate 70 Pro', 'Rococo Pearl', '512GB', 'images/huawei_mate70pro.jpg', 'active'),
+
+('Realme GT6 Pro', 'Realme GT6 Pro sử dụng Snapdragon 8 Gen 3, màn hình AMOLED 6.78 inch và pin 5500mAh.', 14990000, 40, 8, 'Realme', 'GT6 Pro', 'Lunar Silver', '256GB', 'images/realme_gt6pro.jpg', 'active'),
+
+('iPhone 16', 'iPhone 16 bản tiêu chuẩn với chip A18 Bionic, camera kép và màn hình 6.1 inch.', 25990000, 50, 1, 'Apple', 'iPhone 16', 'Blue Titanium', '256GB', 'images/iphone16.jpg', 'active'),
+
+('Samsung Galaxy Z Fold 6', 'Galaxy Z Fold 6 với thiết kế gập cải tiến, chip Snapdragon 8 Gen 3 và màn hình 7.6 inch.', 39990000, 18, 2, 'Samsung', 'Galaxy Z Fold 6', 'Phantom Black', '512GB', 'images/galaxy_zfold6.jpg', 'active');
 
 -- Tạo index để tối ưu hiệu suất
 CREATE INDEX idx_products_category ON products(category_id);
