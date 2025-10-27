@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h3>Chi tiết đơn hàng #{{ order.id }}</h3>
+    <p><strong>Tên khách hàng:</strong> {{ order.customer_name }}</p>
+    <p><strong>Số điện thoại:</strong> {{ order.customer_phone }}</p>
+    <p><strong>Địa chỉ:</strong> {{ order.customer_address }}</p>
+    <p><strong>Trạng thái:</strong> {{ order.status }}</p>
+    <p><strong>Ngày đặt:</strong> {{ order.created_at }}</p>
+
+    <h5 class="mt-4">Sản phẩm trong đơn</h5>
+    <table class="table table-striped text-center">
+        <thead>
+            <tr>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ "{:,.0f}".format(item.price) }}₫</td>
+                <td>{{ "{:,.0f}".format(item.price * item.quantity) }}₫</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h5 class="text-end mt-3">
+        Tổng cộng: <strong>{{ "{:,.0f}".format(order.total_amount) }}₫</strong>
+    </h5>
+
+    <a href="{{ url_for('orders_list') }}" class="btn btn-secondary mt-3">Quay lại danh sách</a>
+</div>
+{% endblock %}

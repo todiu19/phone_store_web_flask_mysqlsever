@@ -104,49 +104,6 @@ MyFlaskApp_advance/
 - Xóa sản phẩm (chuyển sang trạng thái inactive)
 - Xem thống kê
 
-## Tùy chỉnh
-
-### Thêm danh mục mới
-Chạy SQL:
-```sql
-INSERT INTO categories (name, description) VALUES ('Tên danh mục', 'Mô tả');
-```
-
-### Thay đổi giao diện
-Chỉnh sửa file `static/style.css` hoặc các template trong thư mục `templates/`
-
-### Thêm tính năng mới
-1. Thêm route trong `app.py`
-2. Tạo template tương ứng
-3. Cập nhật database nếu cần
-
-## Troubleshooting
-
-### Lỗi kết nối database
-- Kiểm tra thông tin kết nối trong `DB_connect.py`
-- Đảm bảo MySQL đang chạy
-- Kiểm tra database `phone_store` đã được tạo
-
-### Lỗi upload hình ảnh
-- Kiểm tra quyền ghi trong thư mục `static/images/`
-- Đảm bảo file ảnh không quá 16MB
-
-### Lỗi hiển thị
-- Kiểm tra đường dẫn hình ảnh
-- Xóa cache trình duyệt
-- Kiểm tra console để xem lỗi JavaScript
-
-
-
-### Tính năng có thể thêm:
-- [ ] Hệ thống đánh giá sản phẩm
-- [ ] Thanh toán online
-- [ ] Quản lý đơn hàng
-- [ ] API REST
-- [ ] Tìm kiếm nâng cao
-- [ ] So sánh sản phẩm
-- [ ] Wishlist
-- [ ] Newsletter
 
 Email: [tonguyen191224@gmail.com]
 

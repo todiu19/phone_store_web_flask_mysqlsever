@@ -172,7 +172,6 @@ def product_detail(product_id):
     init_cart()
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
     cursor.execute("""
         SELECT p.*, c.name as category_name 
         FROM products p 
@@ -322,6 +321,16 @@ def remove_from_cart(product_id):
         session.modified = True
     return redirect(url_for('cart'))
 
+# ===============================
+# Xác nhận đặt hàng
+# ===============================              
+@app.route('/checkout')
+def checkout():
+    if 'user_id' not in session:
+        flash("Vui lòng đăng nhập để đặt hàng.")
+        return redirect(url_for('login'))
+    return render_template('checkout.html')
+
 #===============================
 # THÊM VÀO GIỎ HOÁ ĐƠN 
 # ===============================
@@ -343,10 +352,13 @@ def orders():
                     WHERE c.user_id = %s
                     """,(user_id,))
     total = cursor.fetchone()['total'] or 0
-    cursor.execute("""INSERT INTO orders(customer_name,customer_email,customer_address,customer_phone,total_amount) 
-                    VALUES(%s,%s,%s,%s,%s)
-                    """,(name,user['email'],address,phone,total,))
-    order_id = cursor.lastrowid
+    
+    #Them vao table orders (thong tin nguoi dat va total)
+    cursor.execute("""INSERT INTO orders(customer_name,customer_email,customer_address,customer_phone,total_amount,user_id) 
+                    VALUES(%s,%s,%s,%s,%s,%s)
+                    """,(name,user['email'],address,phone,total,user_id,))
+    order_id = cursor.lastrowid # get id cuar order vuawf insert
+    #get infor to insert to ordoer_items(chi tiet don hang)
     cursor.execute("""SELECT c.product_id,c.quantity,p.price AS price
                     FROM cart_items c
                     JOIN products p ON c.product_id = p.id
@@ -365,16 +377,56 @@ def orders():
     flash("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.")
     return redirect(url_for('index'))
 
-# ===============================
-# Xác nhận đặt hàng
-# ===============================              
 
-@app.route('/checkout')
-def checkout():
-    if 'user_id' not in session:
-        flash("Vui lòng đăng nhập để đặt hàng.")
-        return redirect(url_for('login'))
-    return render_template('checkout.html')
+# ===============================
+# Xem Danh Sachs Đơn Hàng
+# ===============================
+@app.route('/orders')
+def orders_list():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary = True)
+        if session.get('user_role') == 'admin':
+            cursor.execute("""SELECT * 
+                            FROM orders 
+                            ORDER BY created_at DESC
+                            """)
+        if session.get('user_role') == 'user':
+            cursor.execute("""SELECT * 
+                            FROM orders
+                            WHERE user_id = %s
+                            ORDER BY created_at DESC
+                            """,(user_id,))
+        orders = cursor.fetchall()
+        conn.close()
+        return render_template('orders.html',orders = orders)
+    # chuaw login thif return login
+    return redirect(url_for('login'))
+
+# ===============================
+# Xem Chi Tiết Đơn Hàng
+# ===============================
+@app.route('/order_detail/<int:order_id>',methods = ["GET"])
+def order_detail(order_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary = True)
+    cursor.execute("""SELECT c.quantity,p.price AS price , p.name AS product_name
+                    FROM order_items c
+                    JOIN products p ON c.product_id = p.id
+                    WHERE order_id = %s
+                    """,(order_id,))
+    items = cursor.fetchall()
+
+    cursor.execute("""SELECT * 
+                    FROM orders
+                    WHERE id = %s
+                    """,(order_id,))
+    order = cursor.fetchone()
+    conn.close()
+    return render_template('order_detail.html',items = items,order = order)
+
+
 
 # ===============================
 # TRANG QUẢN LÝ SẢN PHẨM
