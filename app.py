@@ -322,6 +322,60 @@ def remove_from_cart(product_id):
         session.modified = True
     return redirect(url_for('cart'))
 
+#===============================
+# THÊM VÀO GIỎ HOÁ ĐƠN 
+# ===============================
+@app.route('/orders',methods=['POST'])
+def orders():
+    user_id = session['user_id']
+    name = request.form['fullname']
+    address = request.form['address']
+    phone = request.form['phone_number']
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary = True)
+    cursor.execute("""SELECT email FROM users 
+                    WHERE id = %s
+                    """,(user_id,))
+    user = cursor.fetchone()
+    cursor.execute("""SELECT SUM(p.price * c.quantity) AS total
+                    FROM cart_items c
+                    JOIN products p ON c.product_id = p.id 
+                    WHERE c.user_id = %s
+                    """,(user_id,))
+    total = cursor.fetchone()['total'] or 0
+    cursor.execute("""INSERT INTO orders(customer_name,customer_email,customer_address,customer_phone,total_amount) 
+                    VALUES(%s,%s,%s,%s,%s)
+                    """,(name,user['email'],address,phone,total,))
+    order_id = cursor.lastrowid
+    cursor.execute("""SELECT c.product_id,c.quantity,p.price AS price
+                    FROM cart_items c
+                    JOIN products p ON c.product_id = p.id
+                    WHERE user_id = %s
+                    """,(user_id,))
+    cart_items = cursor.fetchall()
+    for item in cart_items:
+        cursor.execute("""INSERT INTO order_items(order_id,product_id,quantity,price) 
+                        VALUES(%s,%s,%s,%s)
+                        """,(order_id,item['product_id'],item['quantity'],item['price'],))
+    cursor.execute("""DELETE FROM cart_items 
+                    WHERE user_id = %s
+                    """,(user_id,))
+    conn.commit()
+    conn.close()
+    flash("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.")
+    return redirect(url_for('index'))
+
+# ===============================
+# Xác nhận đặt hàng
+# ===============================              
+
+@app.route('/checkout')
+def checkout():
+    if 'user_id' not in session:
+        flash("Vui lòng đăng nhập để đặt hàng.")
+        return redirect(url_for('login'))
+    return render_template('checkout.html')
+
 # ===============================
 # TRANG QUẢN LÝ SẢN PHẨM
 # ===============================
@@ -443,62 +497,6 @@ def edit_product(product_id):
     
     conn.close()
     return render_template('edit_product.html', product=product, categories=categories)
-
-# def edit_product(product_id):
-#     conn = get_db_connection()
-#     cursor = conn.cursor(dictionary=True)
-
-#     if request.method == 'POST':
-#         name = request.form['name']
-#         description = request.form['description']
-#         price = float(request.form['price'])
-#         stock = int(request.form['stock'])
-#         category_id = int(request.form['category_id'])
-#         brand = request.form['brand']
-#         model = request.form['model']
-#         color = request.form['color']
-#         storage = request.form['storage']
-#         status = request.form['status']
-
-#         image = request.files['image']
-#         if image and image.filename:
-#             filename = secure_filename(image.filename)
-#             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#             image.save(image_path)
-#             image_url = f'images/{filename}'
-#         else:
-#             cursor.execute("SELECT image FROM products WHERE id = %s", (product_id,))
-#             old_product = cursor.fetchone()
-#             image_url = old_product['image']
-
-#         try:
-#             cursor.execute("""
-#                 UPDATE products 
-#                 SET name=%s, description=%s, price=%s, stock=%s, category_id=%s,
-#                     brand=%s, model=%s, color=%s, storage=%s, image=%s, status=%s
-#                 WHERE id=%s
-#             """, (name, description, price, stock, category_id,
-#                   brand, model, color, storage, image_url, status, product_id))
-#             conn.commit()
-#             flash('Cập nhật sản phẩm thành công!', 'success')
-#         except Exception as e:
-#             conn.rollback()
-#             flash(f'Lỗi khi cập nhật sản phẩm: {e}', 'danger')
-#         finally:
-#             cursor.close()
-#             conn.close()
-
-#         return redirect(url_for('admin_products'))
-
-    # GET request: hiển thị form
-    # cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
-    # product = cursor.fetchone()
-
-    # cursor.execute("SELECT * FROM categories ORDER BY name")
-    # categories = cursor.fetchall()
-
-    # conn.close()
-    # return render_template('edit_product.html', product=product, categories=categories)
 
 # ===============================
 # XÓA SẢN PHẨM

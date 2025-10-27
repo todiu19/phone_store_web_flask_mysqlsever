@@ -1,6 +1,4 @@
--- Tạo cơ sở dữ liệu cho trang web bán điện thoại
--- Sử dụng MySQL
--- Tạo database (nếu chưa có)
+
 CREATE DATABASE IF NOT EXISTS phone_store;
 USE phone_store;
 
