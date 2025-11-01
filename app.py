@@ -475,7 +475,7 @@ def add_product():
             image_url = 'images/default_phone.png'
         
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary = True)
+        cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             INSERT INTO products (name, description, price, stock, category_id, brand, model, color, storage, image, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
@@ -561,7 +561,7 @@ def delete_product(product_id):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("UPDATE products SET status = 'inactive' WHERE id = %s", (product_id,))
     conn.commit()
-    conn.close()
+    conn.close() 
     flash('Xóa sản phẩm thành công!', 'success')
     return redirect(url_for('admin_products'))
 

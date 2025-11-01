@@ -53,7 +53,8 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="price" class="form-label">Giá bán (VNĐ) <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="price" name="price" min="0" step="1000" required>
+                                    <input type="text" class="form-control" id="price" name="price" min="0" step="1000" required>
+
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -111,12 +112,12 @@
 {% block scripts %}
 <script>
 // Format số tiền khi nhập
-document.getElementById('price').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value) {
-        e.target.value = parseInt(value).toLocaleString('vi-VN');
-    }
-});
+// document.getElementById('price').addEventListener('input', function(e) {
+//     let value = e.target.value.replace(/\D/g, '');
+//     if (value) {
+//         e.target.value = parseInt(value).toLocaleString('vi-VN');
+//     }
+// });
 
 // Preview hình ảnh
 document.getElementById('image').addEventListener('change', function(e) {
