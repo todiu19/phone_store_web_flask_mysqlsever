@@ -568,42 +568,95 @@ def delete_product(product_id):
 # ===============================
 # TÌM KIẾM SẢN PHẨM
 # ===============================
+# @app.route('/search')
+# def search():
+#     init_cart()
+#     query = request.args.get('q', '')
+#     category_id = request.args.get('category', '')
+#     conn = get_db_connection()
+#     cursor = conn.cursor(dictionary=True)
+    
+#     sql = """
+#         SELECT p.*, c.name as category_name 
+#         FROM products p 
+#         LEFT JOIN categories c ON p.category_id = c.id 
+#         WHERE p.status = 'active'
+#     """
+#     params = []
+    
+#     if query:
+#         sql += " AND (p.name LIKE %s OR p.brand LIKE %s OR p.model LIKE %s)"
+#         params.extend([f'%{query}%', f'%{query}%', f'%{query}%'])
+    
+#     if category_id:
+#         sql += " AND p.category_id = %s"
+#         params.append(category_id)
+    
+#     sql += " ORDER BY p.created_at DESC"
+    
+#     cursor.execute(sql, params)
+#     phones = cursor.fetchall()
+    
+#     # Lấy danh sách danh mục
+#     cursor.execute("SELECT * FROM categories ORDER BY name")
+#     categories = cursor.fetchall()
+    
+#     conn.close()
+#     return render_template('search.html', phones=phones, categories=categories, query=query, selected_category=category_id)
 @app.route('/search')
 def search():
     init_cart()
     query = request.args.get('q', '')
     category_id = request.args.get('category', '')
-    
+    sort = request.args.get('sort', '')  
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
+
     sql = """
-        SELECT p.*, c.name as category_name 
-        FROM products p 
-        LEFT JOIN categories c ON p.category_id = c.id 
+        SELECT p.*, c.name AS category_name
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
         WHERE p.status = 'active'
     """
     params = []
-    
+
     if query:
         sql += " AND (p.name LIKE %s OR p.brand LIKE %s OR p.model LIKE %s)"
         params.extend([f'%{query}%', f'%{query}%', f'%{query}%'])
-    
+
     if category_id:
         sql += " AND p.category_id = %s"
         params.append(category_id)
-    
-    sql += " ORDER BY p.created_at DESC"
-    
+
+    if sort == 'name':
+        sql += " ORDER BY p.name ASC"
+    elif sort == 'price_asc':
+        sql += " ORDER BY p.price ASC"
+    elif sort == 'price_desc':
+        sql += " ORDER BY p.price DESC"
+    elif sort == 'newest':
+        sql += " ORDER BY p.created_at DESC"
+    else:
+        sql += " ORDER BY p.created_at DESC"
+
+
     cursor.execute(sql, params)
     phones = cursor.fetchall()
-    
+
     # Lấy danh sách danh mục
     cursor.execute("SELECT * FROM categories ORDER BY name")
     categories = cursor.fetchall()
-    
+
     conn.close()
-    return render_template('search.html', phones=phones, categories=categories, query=query, selected_category=category_id)
+
+    return render_template(
+        'search.html',
+        phones=phones,
+        categories=categories,
+        query=query,
+        selected_category=category_id
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

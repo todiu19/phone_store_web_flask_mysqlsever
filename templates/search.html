@@ -58,11 +58,29 @@
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 Sắp xếp
             </button>
+            
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=name">Tên A-Z</a></li>
-                <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=price_asc">Giá thấp đến cao</a></li>
-                <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=price_desc">Giá cao đến thấp</a></li>
-                <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=newest">Mới nhất</a></li>
+                {% set query = request.args.to_dict() %}
+                <li>
+                  {% set q = query.copy() %}
+                  {% set _ = q.pop('sort', None) %}
+                  <a class="dropdown-item" href="?{{ q|urlencode }}&sort=name">Tên A-Z</a>
+                </li>
+                <li>
+                  {% set q = query.copy() %}
+                  {% set _ = q.pop('sort', None) %}
+                  <a class="dropdown-item" href="?{{ q|urlencode }}&sort=price_asc">Giá thấp đến cao</a>
+                </li>
+                <li>
+                  {% set q = query.copy() %}
+                  {% set _ = q.pop('sort', None) %}
+                  <a class="dropdown-item" href="?{{ q|urlencode }}&sort=price_desc">Giá cao đến thấp</a>
+                </li>
+                <li>
+                  {% set q = query.copy() %}
+                  {% set _ = q.pop('sort', None) %}
+                  <a class="dropdown-item" href="?{{ q|urlencode }}&sort=newest">Mới nhất</a>
+                </li>
             </ul>
         </div>
     </div>
